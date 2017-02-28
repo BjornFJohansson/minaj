@@ -1,40 +1,51 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from minaj._version import get_versions as _get_versions
+from _version import get_versions as _get_versions
 __version__      = _get_versions()['version'][:5]
 __long_version__ = _get_versions()['version']
 del _get_versions
 
 def main():
 
-    print('''               _             _ 
-              (_)           (_)
-     _ __ ___  _ _ __   __ _ _ 
-    | '_ ` _ \| | '_ \ / _` | |
-    | | | | | | | | | | (_| | |
-    |_| |_| |_|_|_| |_|\__,_| |
-                           _/ |
+    print('''
+               _             _ 
+              (_)           (_)                      .-=-.          .--.
+     _ __ ___  _ _ __   __ _ _           __        .'     '.       /  " )
+    | '_ ` _ \| | '_ \ / _` | |  _     .'  '.     /   .-.   \     /  .-'\\
+    | | | | | | | | | | (_| | | ( \   / .-.  \   /   /   \   \   /  /    ^
+    |_| |_| |_|_|_| |_|\__,_| |  \ `-` /   \  `-'   /     \   `-`  /
+                           _/ |   `-.-`     '.____.'       `.____.'
                           |__/ 
     version {}
     
-    This script automatically builds, converts and uploads conda packages.
-                              .-=-.          .--.
-                  __        .'     '.       /  " )
-          _     .'  '.     /   .-.   \     /  .-'\\
-         ( \   / .-.  \   /   /   \   \   /  /    ^
-          \ `-` /   \  `-'   /     \   `-`  /
-           `-.-`     '.____.'       `.____.'
-    
+    This script helps you to build, convert and upload a conda package.
     This script should be run  in the same folder as the meta.yaml file.
+    
+    You have the follwing options:
+    
+    - build or process already built packages
+    - set python build version
+    - convert or not to other platforms
+    - upload to your conda channel    
+    
     '''.format(__version__))
+         
+    import subprocess
+    import sys
+    
+    if sys.version_info[:2] <= (2, 7):
+        input = raw_input
+         
     try:
         from termcolor import colored
     except ImportError:
         def colored(text, color): return text
-    import subprocess
-    import pathlib
-    import sys
+
+    try: 
+        import pathlib
+    except ImportError:
+        import pathlib2 as pathlib
     
     if not pathlib.Path("meta.yaml").exists():
         sys.exit(colored("No meta.yaml file found in this directory.\n", "red"))
@@ -54,7 +65,9 @@ def main():
     response = input("build (y/n) ? ")
     
     if response.lower().startswith("y"):
-        bashCommand = "conda build . --no-anaconda-upload"
+        response = input("python version (3.5) ? ")
+        if not response: response="3.5"        
+        bashCommand = "conda build . --no-anaconda-upload --python={ver}".format(ver=ver) 
         process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE, universal_newlines=True)
         output = process.communicate()[0]
         print(colored(output, "blue"))
@@ -117,9 +130,3 @@ def main():
     
 if __name__=="__main__":
     main()
-    
-
-
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
