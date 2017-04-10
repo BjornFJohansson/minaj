@@ -9,6 +9,13 @@ del get_versions
 def main():
     import sys
     pyver = sys.version[:6]
+    
+    import os
+    
+    def cmd_exists(cmd):
+        return any(
+                os.access(os.path.join(path, cmd), os.X_OK) 
+                for path in os.environ["PATH"].split(os.pathsep))
 
     print('''
                _             _ 
@@ -22,6 +29,9 @@ def main():
     minaj version  {}
     minaj is running on Python {}
     
+    conda           is available: {}
+    anaconda-client is available: {}
+    
     This script helps you to build, convert and upload a conda package.
     This script should be run in the same folder as the meta.yaml file.
     
@@ -30,9 +40,17 @@ def main():
     - build or process already built packages
     - set python version to use for build
     - convert or not to other platforms
-    - upload to your conda channel   
+    - upload to your conda channel
     
-    '''.format(__version__, pyver))
+    for uploading packages, you need to have anaconda-client installed.
+    it can be installed like this:
+    
+    conda install anaconda-client
+    
+    '''.format(__version__, 
+               pyver, 
+               cmd_exists("conda"), 
+               cmd_exists("anaconda")))
          
     import subprocess
     
